@@ -100,23 +100,8 @@ MCGen::MCGen (TargetInfo const *info)
     this->_pb->crossRegisterProxies(lam, this->_fam, cgam, this->_mam);
 
     // set up the optimization passes
-    llvm::FunctionPassManager fpm;
-    fpm.addPass(llvm::LowerExpectIntrinsicPass());      // -lower-expect
-    fpm.addPass(llvm::SimplifyCFGPass());               // -simplifycfg
-    fpm.addPass(llvm::InstCombinePass());               // -instcombine
-    fpm.addPass(llvm::ReassociatePass());               // -reassociate
-    fpm.addPass(llvm::EarlyCSEPass(false));             // -early-cse
-    fpm.addPass(llvm::GVNPass());                       // -gvn
-    fpm.addPass(llvm::SCCPPass());                      // -sccp
-    fpm.addPass(llvm::DCEPass());                       // -dce
-    fpm.addPass(llvm::SimplifyCFGPass());               // -simplifycfg
-    fpm.addPass(llvm::InstCombinePass());               // -instcombine
-    // for the last simplification pass, we want to convert switches to jump tables
-    llvm::SimplifyCFGOptions opts;
-    opts.ConvertSwitchToLookupTable = true;
-    fpm.addPass(llvm::SimplifyCFGPass(opts));           // -simplifycfg
-
-    this->_pm.addPass (llvm::createModuleToFunctionPassAdaptor(std::move(fpm)));
+    this->_pm =
+        this->_pb->buildPerModuleDefaultPipeline(llvm::OptimizationLevel::O2); 
 
 } // MCGen constructor
 
